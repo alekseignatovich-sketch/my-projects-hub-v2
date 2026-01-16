@@ -19,7 +19,7 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchProjects = async () => {
-    const {  projectsData } = await supabase
+    const {  data: projectsData } = await supabase
       .from('projects')
       .select('*')
       .eq('user_id', user.id)
