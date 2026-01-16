@@ -187,33 +187,45 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes') => {
-    if (!project || !title) return;
-    
-    setIsGenerating(true);
-    setAiResponse('');
-    setAiError('');
+const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes') => {
+  if (!project || !title) return;
+  
+  setIsGenerating(true);
+  setAiResponse('');
+  setAiError('');
 
-    try {
-      let prompt = '';
-      
-      switch (type) {
-        case 'description':
-          prompt = `Напиши профессиональное описание для проекта "${title}". Описание должно быть кратким (2-3 предложения), в деловом стиле.`;
-          break;
-          
-        case 'tasks':
-          prompt = `Разбей проект "${title}" на 5 конкретных этапов выполнения. Каждый этап должен начинаться с глагола (например, "Создать", "Разработать"). Ответ дай в виде списка через запятую.`;
-          break;
-          
-        case 'improve':
-          prompt = `Проанализируй проект "${title}". Описание: "${description}". Предложи 3 конкретных улучшения или идеи для развития. Ответ дай кратко.`;
-          break;
-          
-        case 'notes':
-          prompt = `Напиши содержательные заметки для этапа проекта "${title}". Заметки должны включать советы, на что обратить внимание, возможные риски. Объём: 3-4 предложения.`;
-          break;
-      }
+  try {
+    // Берём текущее описание из состояния
+    const currentDescription = description.trim() || 'No description provided';
+    
+    let prompt = '';
+    
+    switch (type) {
+      case 'description':
+        prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style.`;
+        break;
+        
+      case 'tasks':
+        prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list.`;
+        break;
+        
+      case 'improve':
+        prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable.`;
+        break;
+        
+      case 'notes':
+        prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences.`;
+        break;
+    }
+
+    const response = await getAIResponse(prompt);
+    setAiResponse(response);
+  } catch (error) {
+    setAiError((error as Error).message);
+  } finally {
+    setIsGenerating(false);
+  }
+};
 
       const response = await getAIResponse(prompt);
       setAiResponse(response);
