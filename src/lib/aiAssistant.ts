@@ -1,3 +1,4 @@
+// src/lib/aiAssistant.ts
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = import.meta.env.VITE_AI_API_KEY;
 
@@ -15,7 +16,8 @@ export async function getAIResponse(prompt: string): Promise<string> {
       'X-Title': 'Projects Hub'
     },
     body: JSON.stringify({
-      model: "meta-llama/llama-3.1-8b-instruct:free",
+      // Используем рабочую бесплатную модель
+      model: "nousresearch/hermes-3-llama-3.1-405b",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 500
     })
