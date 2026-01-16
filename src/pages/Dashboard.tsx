@@ -19,13 +19,13 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchProjects = async () => {
-    const {   projectsData } = await supabase
+    const { data: projectsData, error } = await supabase
       .from('projects')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (!projectsData) {
+    if (error || !projectsData) {
       setLoading(false);
       return;
     }
@@ -37,20 +37,20 @@ export default function Dashboard() {
 
     for (const project of projectsData) {
       if (project.preview_path) {
-        const {   signedUrlData } = await supabase.storage
+        const { data: signedUrlData, error: urlError } = await supabase.storage
           .from('project-assets')
           .createSignedUrl(project.preview_path, 3600);
-        if (signedUrlData?.signedUrl) {
+        if (!urlError && signedUrlData?.signedUrl) {
           previews[project.id] = signedUrlData.signedUrl;
         }
       }
 
-      const {   tasksData } = await supabase
+      const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
         .select('completed')
         .eq('project_id', project.id);
       
-      if (tasksData) {
+      if (!tasksError && tasksData) {
         const completed = tasksData.filter((t: any) => t.completed).length;
         progresses[project.id] = tasksData.length ? Math.round((completed / tasksData.length) * 100) : 0;
       }
@@ -62,12 +62,15 @@ export default function Dashboard() {
   };
 
   const handleCreate = async () => {
-    const {   newProject } = await supabase
+    const { data: newProject, error } = await supabase
       .from('projects')
       .insert({ user_id: user.id, title: t('new_project'), description: '' })
       .select()
       .single();
-    navigate(`/project/${newProject.id}`);
+    
+    if (!error && newProject) {
+      navigate(`/project/${newProject.id}`);
+    }
   };
 
   if (loading) return <div>{t('loading')}...</div>;
