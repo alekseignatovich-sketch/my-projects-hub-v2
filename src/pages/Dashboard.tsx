@@ -45,7 +45,7 @@ export default function Dashboard() {
         }
       }
 
-      const {   tasksData } = await supabase
+      const {  data: tasksData } = await supabase
         .from('tasks')
         .select('completed')
         .eq('project_id', project.id);
@@ -62,7 +62,7 @@ export default function Dashboard() {
   };
 
   const handleCreate = async () => {
-    const {   newProject } = await supabase
+    const {  data: newProject } = await supabase
       .from('projects')
       .insert({ user_id: user.id, title: t('new_project'), description: '' })
       .select()
