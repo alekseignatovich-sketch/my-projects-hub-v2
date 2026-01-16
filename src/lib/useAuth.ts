@@ -8,17 +8,17 @@ export function useAuth() {
 
   useEffect(() => {
     const initAuth = async () => {
-      const {  { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       const sessionUser = session?.user;
 
       if (sessionUser) {
-        const {  profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('user_profiles')
           .select('preferred_language')
           .eq('id', sessionUser.id)
           .single();
 
-        if (!profile) {
+        if (error) {
           await supabase
             .from('user_profiles')
             .insert({ id: sessionUser.id, preferred_language: 'en' });
@@ -63,7 +63,7 @@ export function useAuth() {
 
   const getPreferredLanguage = async (): Promise<Language> => {
     if (!user) return 'en';
-    const {  profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('user_profiles')
       .select('preferred_language')
       .eq('id', user.id)
