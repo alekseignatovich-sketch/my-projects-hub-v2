@@ -27,7 +27,7 @@ export default function ProjectDetailPage() {
   }, [user, id]);
 
   const loadProjectData = async () => {
-    const { data: projectData } = await supabase.from('projects').select().single();
+    const {   projectData } = await supabase
       .from('projects')
       .select('*')
       .eq('id', id)
@@ -44,7 +44,7 @@ export default function ProjectDetailPage() {
     setDescription(projectData.description);
 
     if (projectData.preview_path) {
-      const { data: signedUrlData } = await supabase.storage.createSignedUrl(...);
+      const {   signedUrlData } = await supabase.storage
         .from('project-assets')
         .createSignedUrl(projectData.preview_path, 3600);
       if (signedUrlData?.signedUrl) {
@@ -52,14 +52,14 @@ export default function ProjectDetailPage() {
       }
     }
 
-    const { data: tasksData } = await supabase.from('tasks').select();
+    const {   tasksData } = await supabase
       .from('tasks')
       .select('*')
       .eq('project_id', id)
       .order('position', { ascending: true });
     setTasks(tasksData || []);
 
-    const { data: notesData } = await supabase.from('notes').select().single();
+    const {   notesData } = await supabase
       .from('notes')
       .select('content')
       .eq('project_id', id)
@@ -129,7 +129,7 @@ export default function ProjectDetailPage() {
   const handleAddTask = async () => {
     if (!newTaskTitle.trim() || !id) return;
 
-    const { data: newTask } = await supabase.from('tasks').insert(...).select().single();
+    const {   newTask } = await supabase
       .from('tasks')
       .insert({
         project_id: id,
