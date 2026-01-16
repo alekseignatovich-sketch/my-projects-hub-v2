@@ -19,7 +19,7 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchProjects = async () => {
-    const { data: projectsData } = await supabase.from('projects').select();
+    const {   projectsData } = await supabase
       .from('projects')
       .select('*')
       .eq('user_id', user.id)
@@ -37,7 +37,7 @@ export default function Dashboard() {
 
     for (const project of projectsData) {
       if (project.preview_path) {
-        const { data: signedUrlData } = await supabase.storage.createSignedUrl(...);
+        const {   signedUrlData } = await supabase.storage
           .from('project-assets')
           .createSignedUrl(project.preview_path, 3600);
         if (signedUrlData?.signedUrl) {
@@ -45,7 +45,7 @@ export default function Dashboard() {
         }
       }
 
-      const { data: tasksData } = await supabase.from('tasks').select();
+      const {   tasksData } = await supabase
         .from('tasks')
         .select('completed')
         .eq('project_id', project.id);
@@ -62,7 +62,7 @@ export default function Dashboard() {
   };
 
   const handleCreate = async () => {
-    const { data: newProject } = await supabase.from('projects').insert(...).select().single();
+    const {   newProject } = await supabase
       .from('projects')
       .insert({ user_id: user.id, title: t('new_project'), description: '' })
       .select()
