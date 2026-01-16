@@ -27,14 +27,14 @@ export default function ProjectDetailPage() {
   }, [user, id]);
 
   const loadProjectData = async () => {
-    const {   projectData } = await supabase
+    const { data: projectData, error } = await supabase
       .from('projects')
       .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
-    if (!projectData) {
+    if (error || !projectData) {
       navigate('/');
       return;
     }
@@ -44,27 +44,31 @@ export default function ProjectDetailPage() {
     setDescription(projectData.description);
 
     if (projectData.preview_path) {
-      const {   signedUrlData } = await supabase.storage
+      const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('project-assets')
         .createSignedUrl(projectData.preview_path, 3600);
-      if (signedUrlData?.signedUrl) {
+      if (!urlError && signedUrlData?.signedUrl) {
         setPreviewUrl(signedUrlData.signedUrl);
       }
     }
 
-    const {   tasksData } = await supabase
+    const { data: tasksData, error: tasksError } = await supabase
       .from('tasks')
       .select('*')
       .eq('project_id', id)
       .order('position', { ascending: true });
-    setTasks(tasksData || []);
+    if (!tasksError) {
+      setTasks(tasksData || []);
+    }
 
-    const {   notesData } = await supabase
+    const { data: notesData, error: notesError } = await supabase
       .from('notes')
       .select('content')
       .eq('project_id', id)
       .single();
-    setNotes(notesData?.content || '');
+    if (!notesError) {
+      setNotes(notesData?.content || '');
+    }
   };
 
   const handleSaveProject = async () => {
@@ -129,7 +133,7 @@ export default function ProjectDetailPage() {
   const handleAddTask = async () => {
     if (!newTaskTitle.trim() || !id) return;
 
-    const {   newTask } = await supabase
+    const { data: newTask, error } = await supabase
       .from('tasks')
       .insert({
         project_id: id,
@@ -140,7 +144,7 @@ export default function ProjectDetailPage() {
       .select()
       .single();
 
-    if (newTask) {
+    if (!error && newTask) {
       setTasks([...tasks, newTask]);
       setNewTaskTitle('');
     }
