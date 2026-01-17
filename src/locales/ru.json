@@ -24,5 +24,12 @@
   "project_title_required": "Название проекта обязательно",
   "logout": "Выйти",
   "save_notes": "Сохранить заметки",
-  "notes_saved": "Заметки сохранены!"
+  "notes_saved": "Заметки сохранены!",
+  "project_title_placeholder": "Название проекта",
+  "description_placeholder": "Описание проекта",
+  "no_description": "Без описания",
+  "ai_description": "Описание",
+  "ai_tasks": "Этапы",
+  "ai_improve": "Улучшить",
+  "ai_notes": "Заметки"
 }
