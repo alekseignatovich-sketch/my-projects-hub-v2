@@ -40,8 +40,8 @@ export default function ProjectDetailPage() {
     }
 
     setProject(projectData);
-    setTitle(projectData.title);
-    setDescription(projectData.description);
+    setTitle(projectData.title || '');
+    setDescription(projectData.description || '');
 
     if (projectData.preview_path) {
       const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -72,22 +72,19 @@ export default function ProjectDetailPage() {
   };
 
   const handleSaveProject = async () => {
-    if (!title.trim()) {
-      alert(t('project_title_required'));
-      return;
-    }
-
+    const finalTitle = title.trim() || t('new_project'); // Обязательное название
+    
     const { error } = await supabase
       .from('projects')
       .update({ 
-        title: title.trim(), 
+        title: finalTitle, 
         description: description.trim(),
         updated_at: new Date().toISOString() 
       })
       .eq('id', id);
 
     if (!error) {
-      setProject((prev: any) => ({ ...prev, title: title.trim(), description: description.trim() }));
+      setProject((prev: any) => ({ ...prev, title: finalTitle, description: description.trim() }));
       alert(t('save_success'));
     }
   };
@@ -187,45 +184,34 @@ export default function ProjectDetailPage() {
     }
   };
 
-const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes') => {
-  if (!project || !title) return;
-  
-  setIsGenerating(true);
-  setAiResponse('');
-  setAiError('');
-
-  try {
-    // Берём текущее описание из состояния
-    const currentDescription = description.trim() || 'No description provided';
+  const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes') => {
+    if (!project) return;
     
-    let prompt = '';
-    
-    switch (type) {
-      case 'description':
-        prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style.`;
-        break;
-        
-      case 'tasks':
-        prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list.`;
-        break;
-        
-      case 'improve':
-        prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable.`;
-        break;
-        
-      case 'notes':
-        prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences.`;
-        break;
-    }
+    setIsGenerating(true);
+    setAiResponse('');
+    setAiError('');
 
-    const response = await getAIResponse(prompt);
-    setAiResponse(response);
-  } catch (error) {
-    setAiError((error as Error).message);
-  } finally {
-    setIsGenerating(false);
-  }
-};
+    try {
+      const currentDescription = description.trim() || 'No description provided';
+      let prompt = '';
+      
+      switch (type) {
+        case 'description':
+          prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style.`;
+          break;
+          
+        case 'tasks':
+          prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list.`;
+          break;
+          
+        case 'improve':
+          prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable.`;
+          break;
+          
+        case 'notes':
+          prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences.`;
+          break;
+      }
 
       const response = await getAIResponse(prompt);
       setAiResponse(response);
@@ -244,73 +230,110 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h1 style={{ margin: 0, color: '#0f0' }}>{title}</h1>
-        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{progress}%</span>
+      {/* Заголовок с редактируемым названием */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start', 
+        marginBottom: '24px' 
+      }}>
+        <div style={{ flex: 1 }}>
+          <input
+            type="text"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder={t('project_title_placeholder')}
+            style={{ 
+              width: '100%',
+              fontSize: '24px',
+              fontWeight: '600',
+              color: '#0f0',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '2px solid rgba(0, 255, 0, 0.3)',
+              padding: '4px 0',
+              marginBottom: '8px'
+            }}
+          />
+          <span style={{ 
+            fontSize: '14px', 
+            fontWeight: 'bold', 
+            color: '#0f0',
+            background: 'rgba(0, 255, 0, 0.2)',
+            padding: '2px 8px',
+            borderRadius: '10px'
+          }}>
+            {progress}%
+          </span>
+        </div>
       </div>
 
       {/* Кнопки ИИ */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
         gap: '8px', 
-        marginBottom: '16px' 
+        marginBottom: '24px' 
       }}>
         <button
           onClick={() => handleAIAssist('description')}
           disabled={isGenerating}
           style={{
-            padding: '6px 10px',
-            fontSize: '14px',
+            padding: '8px',
+            fontSize: '12px',
             backgroundColor: '#6a0dad',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '6px',
+            fontWeight: '500'
           }}
         >
-          📝 Описание
+          📝 {t('ai_description')}
         </button>
         <button
           onClick={() => handleAIAssist('tasks')}
           disabled={isGenerating}
           style={{
-            padding: '6px 10px',
-            fontSize: '14px',
+            padding: '8px',
+            fontSize: '12px',
             backgroundColor: '#6a0dad',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '6px',
+            fontWeight: '500'
           }}
         >
-          ✅ Этапы
+          ✅ {t('ai_tasks')}
         </button>
         <button
           onClick={() => handleAIAssist('improve')}
           disabled={isGenerating}
           style={{
-            padding: '6px 10px',
-            fontSize: '14px',
+            padding: '8px',
+            fontSize: '12px',
             backgroundColor: '#6a0dad',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '6px',
+            fontWeight: '500'
           }}
         >
-          💡 Улучшить
+          💡 {t('ai_improve')}
         </button>
         <button
           onClick={() => handleAIAssist('notes')}
           disabled={isGenerating}
           style={{
-            padding: '6px 10px',
-            fontSize: '14px',
+            padding: '8px',
+            fontSize: '12px',
             backgroundColor: '#6a0dad',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '6px',
+            fontWeight: '500'
           }}
         >
-          📓 Заметки
+          📓 {t('ai_notes')}
         </button>
       </div>
 
@@ -320,7 +343,7 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
           padding: '10px', 
           background: 'rgba(220, 53, 69, 0.2)', 
           color: '#ff6b6b',
-          borderRadius: '4px',
+          borderRadius: '8px',
           marginBottom: '16px'
         }}>
           {aiError}
@@ -333,10 +356,10 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
           padding: '12px',
           background: 'rgba(106, 13, 173, 0.2)',
           border: '1px solid #6a0dad',
-          borderRadius: '4px',
+          borderRadius: '8px',
           color: '#e0b0ff',
           whiteSpace: 'pre-wrap',
-          marginBottom: '16px'
+          marginBottom: '24px'
         }}>
           {aiResponse}
         </div>
@@ -345,22 +368,22 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
       <textarea
         value={description}
         onChange={e => setDescription(e.target.value)}
-        placeholder={t('description')}
+        placeholder={t('description_placeholder')}
         rows={3}
         style={{ 
           width: '100%', 
-          padding: '8px', 
-          marginBottom: '16px', 
-          fontSize: '16px', 
-          border: '1px solid #0f0', 
-          borderRadius: '4px',
-          background: 'rgba(0, 20, 0, 0.5)',
+          padding: '12px',
+          marginBottom: '24px',
+          fontSize: '16px',
+          border: '1px solid rgba(0, 255, 0, 0.3)',
+          borderRadius: '8px',
+          background: 'rgba(20, 20, 30, 0.8)',
           color: '#0f0'
         }}
       />
 
       {previewUrl && (
-        <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
           {previewUrl.endsWith('.mp4') ? (
             <video
               src={previewUrl}
@@ -370,7 +393,7 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
                 maxHeight: '300px',
                 width: 'auto',
                 height: 'auto',
-                borderRadius: '4px'
+                borderRadius: '8px'
               }}
             />
           ) : (
@@ -382,7 +405,7 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
                 maxHeight: '300px',
                 width: 'auto',
                 height: 'auto',
-                borderRadius: '4px'
+                borderRadius: '8px'
               }}
             />
           )}
@@ -392,12 +415,14 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
       <button
         onClick={() => document.getElementById('preview-input')?.click()}
         style={{
-          marginBottom: '16px',
-          padding: '8px 12px',
+          marginBottom: '24px',
+          padding: '10px 16px',
           backgroundColor: '#007bff',
           color: 'white',
           border: 'none',
-          borderRadius: '4px'
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500'
         }}
       >
         {t('upload_preview')}
@@ -410,17 +435,19 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
         style={{ display: 'none' }}
       />
 
-      <h3 style={{ color: '#0f0' }}>{t('tasks')} ({tasks.filter(t => t.completed).length}/{tasks.length})</h3>
-      <div style={{ marginBottom: '16px' }}>
+      <h3 style={{ color: '#0f0', marginBottom: '16px', fontSize: '18px' }}>
+        {t('tasks')} ({tasks.filter(t => t.completed).length}/{tasks.length})
+      </h3>
+      <div style={{ marginBottom: '24px' }}>
         {tasks.map(task => (
-          <div key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+          <div key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
             <input
               type="checkbox"
               checked={task.completed}
               onChange={e => handleToggleTask(task.id, e.target.checked)}
-              style={{ marginRight: '8px', transform: 'scale(1.2)' }}
+              style={{ marginRight: '12px', transform: 'scale(1.3)' }}
             />
-            <span style={{ flex: 1, fontSize: '16px' }}>{task.title}</span>
+            <span style={{ flex: 1, fontSize: '16px', color: '#0f0' }}>{task.title}</span>
             <input
               type="number"
               step="0.25"
@@ -428,36 +455,54 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
               value={task.hours_spent}
               onChange={e => handleUpdateHours(task.id, e.target.value)}
               placeholder="0"
-              style={{ width: '80px', padding: '4px', fontSize: '14px', textAlign: 'right', background: 'rgba(0,20,0,0.5)', border: '1px solid #0f0', color: '#0f0' }}
+              style={{ 
+                width: '80px', 
+                padding: '6px', 
+                fontSize: '14px', 
+                textAlign: 'right', 
+                background: 'rgba(20, 20, 30, 0.8)',
+                border: '1px solid rgba(0, 255, 0, 0.3)',
+                color: '#0f0',
+                borderRadius: '4px'
+              }}
             />
-            <span style={{ marginLeft: '4px', fontSize: '14px', color: '#0f0' }}>{t('hours_spent')}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
         <input
           value={newTaskTitle}
           onChange={e => setNewTaskTitle(e.target.value)}
           placeholder={t('task_title')}
-          style={{ flex: 1, padding: '8px', fontSize: '16px', border: '1px solid #0f0', borderRadius: '4px', background: 'rgba(0,20,0,0.5)', color: '#0f0' }}
+          style={{ 
+            flex: 1, 
+            padding: '10px', 
+            fontSize: '16px', 
+            border: '1px solid rgba(0, 255, 0, 0.3)',
+            borderRadius: '8px',
+            background: 'rgba(20, 20, 30, 0.8)',
+            color: '#0f0'
+          }}
         />
         <button
           onClick={handleAddTask}
           disabled={!newTaskTitle.trim()}
           style={{
-            padding: '8px 16px',
-            backgroundColor: newTaskTitle.trim() ? '#28a745' : '#ccc',
+            padding: '10px 16px',
+            backgroundColor: newTaskTitle.trim() ? '#28a745' : '#444',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500'
           }}
         >
           +
         </button>
       </div>
 
-      <h3 style={{ color: '#0f0' }}>{t('notes')}</h3>
+      <h3 style={{ color: '#0f0', marginBottom: '16px', fontSize: '18px' }}>{t('notes')}</h3>
       <textarea
         value={notes}
         onChange={e => setNotes(e.target.value)}
@@ -465,29 +510,32 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
         rows={6}
         style={{ 
           width: '100%', 
-          padding: '8px', 
-          fontSize: '16px', 
-          border: '1px solid #0f0', 
-          borderRadius: '4px',
-          background: 'rgba(0, 20, 0, 0.5)',
+          padding: '12px',
+          fontSize: '16px',
+          border: '1px solid rgba(0, 255, 0, 0.3)',
+          borderRadius: '8px',
+          background: 'rgba(20, 20, 30, 0.8)',
           color: '#0f0',
-          marginBottom: '8px'
+          marginBottom: '16px'
         }}
       />
       <button
         onClick={handleSaveNotes}
         style={{
-          padding: '6px 12px',
+          padding: '10px 16px',
           backgroundColor: '#007bff',
           color: 'white',
           border: 'none',
-          borderRadius: '4px'
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          marginBottom: '24px'
         }}
       >
         {t('save_notes')}
       </button>
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+      <div style={{ display: 'flex', gap: '12px' }}>
         <button
           onClick={() => navigate('/')}
           style={{
@@ -495,7 +543,9 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
             backgroundColor: '#6c757d',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500'
           }}
         >
           ← {t('back_to_projects')}
@@ -507,7 +557,9 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
             backgroundColor: '#007bff',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500'
           }}
         >
           {t('save')}
@@ -519,7 +571,9 @@ const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes
             backgroundColor: '#dc3545',
             color: 'white',
             border: 'none',
-            borderRadius: '4px'
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500'
           }}
         >
           {t('delete_project')}
