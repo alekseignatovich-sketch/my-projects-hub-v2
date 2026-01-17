@@ -62,9 +62,14 @@ export default function Dashboard() {
   };
 
   const handleCreate = async () => {
+    // Создаём проект с редактируемым названием
     const { data: newProject, error } = await supabase
       .from('projects')
-      .insert({ user_id: user.id, title: t('new_project'), description: '' })
+      .insert({ 
+        user_id: user.id, 
+        title: '', // Пустое название для редактирования
+        description: '' 
+      })
       .select()
       .single();
     
@@ -77,19 +82,31 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h1 style={{ color: '#0f0' }}>{t('projects')}</h1>
-        <div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '24px' 
+      }}>
+        <h1 style={{ 
+          color: '#0f0', 
+          margin: 0,
+          fontSize: '24px',
+          fontWeight: '600'
+        }}>
+          {t('projects')}
+        </h1>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={() => logout()}
             style={{
-              padding: '6px 12px',
+              padding: '8px 16px',
               backgroundColor: '#dc3545',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: '8px',
               fontSize: '14px',
-              marginRight: '8px'
+              fontWeight: '500'
             }}
           >
             {t('logout')}
@@ -98,10 +115,12 @@ export default function Dashboard() {
             onClick={handleCreate}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#28a745',
+              backgroundColor: '#007bff',
               color: 'white',
               border: 'none',
-              borderRadius: '4px'
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500'
             }}
           >
             + {t('new_project')}
@@ -110,48 +129,92 @@ export default function Dashboard() {
       </div>
 
       {projects.length === 0 ? (
-        <p style={{ color: '#0f0' }}>{t('no_projects_yet')}</p>
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '40px 20px',
+          color: '#0f0',
+          opacity: 0.7
+        }}>
+          {t('no_projects_yet')}
+        </div>
       ) : (
-        <div style={{ display: 'grid', gap: '16px' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+          gap: '16px'
+        }}>
           {projects.map(project => (
             <div
               key={project.id}
               onClick={() => navigate(`/project/${project.id}`)}
               style={{
-                padding: '12px',
-                border: '1px solid #0f0',
-                borderRadius: '8px',
+                background: 'rgba(20, 20, 30, 0.8)',
+                borderRadius: '12px',
+                padding: '16px',
                 cursor: 'pointer',
-                background: 'rgba(0, 20, 0, 0.6)',
-                color: '#0f0',
+                border: '1px solid rgba(0, 255, 0, 0.2)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
                 position: 'relative',
                 overflow: 'hidden'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
+              {/* Иконка проекта */}
+              <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                background: '#007bff', 
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                marginBottom: '12px',
+                fontSize: '18px'
+              }}>
+                {project.title.charAt(0).toUpperCase() || 'P'}
+              </div>
+
+              {/* Прогресс */}
               <div style={{
                 position: 'absolute',
                 top: '8px',
                 right: '8px',
-                fontSize: '12px',
-                fontWeight: 'bold'
+                fontSize: '10px',
+                fontWeight: 'bold',
+                background: 'rgba(0, 255, 0, 0.2)',
+                padding: '2px 6px',
+                borderRadius: '10px'
               }}>
                 {progressMap[project.id] || 0}%
               </div>
 
-              <h3 style={{ margin: '0 0 6px 0', fontSize: '18px' }}>{project.title}</h3>
+              <h3 style={{ 
+                margin: '0 0 6px 0', 
+                fontSize: '16px',
+                color: '#0f0',
+                fontWeight: '600',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                {project.title || t('new_project')}
+              </h3>
               
-              {previewUrls[project.id] && (
-                <div style={{ height: '60px', overflow: 'hidden', borderRadius: '4px', marginBottom: '6px' }}>
-                  {previewUrls[project.id]?.endsWith('.mp4') ? (
-                    <video src={previewUrls[project.id]} muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <img src={previewUrls[project.id]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  )}
-                </div>
-              )}
-
-              <p style={{ fontSize: '14px', opacity: 0.8, margin: 0 }}>
-                {project.description.substring(0, 80)}{project.description.length > 80 ? '...' : ''}
+              <p style={{ 
+                fontSize: '12px', 
+                color: '#0f0',
+                opacity: 0.7,
+                margin: 0,
+                lineHeight: 1.4,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}>
+                {project.description || t('no_description')}
               </p>
             </div>
           ))}
