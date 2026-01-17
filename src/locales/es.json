@@ -24,5 +24,12 @@
   "project_title_required": "El título del proyecto es obligatorio",
   "logout": "Cerrar sesión",
   "save_notes": "Guardar notas",
-  "notes_saved": "Notas guardadas!"
+  "notes_saved": "Notas guardadas!",
+  "project_title_placeholder": "Título del proyecto",
+  "description_placeholder": "Descripción del proyecto",
+  "no_description": "Sin descripción",
+  "ai_description": "Descripción",
+  "ai_tasks": "Tareas",
+  "ai_improve": "Mejorar",
+  "ai_notes": "Notas"
 }
