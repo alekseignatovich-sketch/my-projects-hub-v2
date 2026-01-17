@@ -1,5 +1,12 @@
 {
   "login": "Log in",
+  "project_title_placeholder": "Project title",
+  "description_placeholder": "Project description",
+  "no_description": "No description",
+  "ai_description": "Description",
+  "ai_tasks": "Tasks",
+  "ai_improve": "Improve",
+  "ai_notes": "Notes",
   "signup": "Sign up",
   "email": "Email",
   "password": "Password",
