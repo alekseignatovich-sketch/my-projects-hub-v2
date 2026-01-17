@@ -72,7 +72,7 @@ export default function ProjectDetailPage() {
   };
 
   const handleSaveProject = async () => {
-    const finalTitle = title.trim() || t('new_project'); // Обязательное название
+    const finalTitle = title.trim() || t('new_project');
     
     const { error } = await supabase
       .from('projects')
@@ -193,23 +193,32 @@ export default function ProjectDetailPage() {
 
     try {
       const currentDescription = description.trim() || 'No description provided';
+      
+      // Определяем язык ответа
+      const languageMap: Record<string, string> = {
+        'en': 'English',
+        'ru': 'Russian',
+        'es': 'Spanish'
+      };
+      const responseLanguage = languageMap[lang] || 'English';
+      
       let prompt = '';
       
       switch (type) {
         case 'description':
-          prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style.`;
+          prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style. Respond in ${responseLanguage}.`;
           break;
           
         case 'tasks':
-          prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list.`;
+          prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list. Respond in ${responseLanguage}.`;
           break;
           
         case 'improve':
-          prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable.`;
+          prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable. Respond in ${responseLanguage}.`;
           break;
           
         case 'notes':
-          prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences.`;
+          prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences. Respond in ${responseLanguage}.`;
           break;
       }
 
