@@ -35,7 +35,15 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ 
+        padding: '16px', 
+        maxWidth: '800px', 
+        margin: '0 auto',
+        background: 'rgba(10, 10, 15, 0.9)',
+        borderRadius: '16px',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(0, 255, 0, 0.1)'
+      }}>
         {user && (
           <select
             value={lang}
@@ -44,9 +52,9 @@ function App() {
               marginBottom: '16px',
               fontSize: '16px',
               padding: '6px 12px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               border: '1px solid #0f0',
-              background: 'rgba(0,20,0,0.5)',
+              background: 'rgba(0, 20, 0, 0.7)',
               color: '#0f0'
             }}
           >
