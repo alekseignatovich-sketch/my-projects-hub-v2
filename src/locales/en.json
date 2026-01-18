@@ -1,12 +1,5 @@
 {
   "login": "Log in",
-  "project_title_placeholder": "Project title",
-  "description_placeholder": "Project description",
-  "no_description": "No description",
-  "ai_description": "Description",
-  "ai_tasks": "Tasks",
-  "ai_improve": "Improve",
-  "ai_notes": "Notes",
   "signup": "Sign up",
   "email": "Email",
   "password": "Password",
@@ -31,5 +24,18 @@
   "project_title_required": "Project title is required",
   "logout": "Log out",
   "save_notes": "Save Notes",
-  "notes_saved": "Notes saved!"
+  "notes_saved": "Notes saved!",
+  "project_title_placeholder": "Project title",
+  "description_placeholder": "Project description",
+  "no_description": "No description",
+  "ai_description": "Description",
+  "ai_tasks": "Tasks",
+  "ai_improve": "Improve",
+  "ai_notes": "Notes",
+  "additional_info": "Additional Information",
+  "ask_ai": "Ask AI",
+  "ask_ai_placeholder": "Ask your question to AI...",
+  "welcome_title": "Welcome to Projects Hub",
+  "welcome_description": "Manage your projects, track tasks, and get AI assistance for better productivity.",
+  "create_with_ai_prompt": "Create your project with AI assistant!"
 }
