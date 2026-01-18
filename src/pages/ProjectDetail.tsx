@@ -12,14 +12,14 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState(''); // ← новое поле
+  const [additionalInfo, setAdditionalInfo] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [notes, setNotes] = useState('');
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiError, setAiError] = useState('');
-  const [aiQuestion, setAiQuestion] = useState(''); // ← строка вопроса
+  const [aiQuestion, setAiQuestion] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ export default function ProjectDetailPage() {
     setProject(projectData);
     setTitle(projectData.title || '');
     setDescription(projectData.description || '');
-    setAdditionalInfo(projectData.additional_info || ''); // ← загружаем доп. инфо
+    setAdditionalInfo(projectData.additional_info || '');
 
     if (projectData.preview_path) {
       const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -82,7 +82,7 @@ export default function ProjectDetailPage() {
       .update({ 
         title: finalTitle, 
         description: description.trim(),
-        additional_info: additionalInfo.trim(), // ← сохраняем доп. инфо
+        additional_info: additionalInfo.trim(),
         updated_at: new Date().toISOString() 
       })
       .eq('id', id);
@@ -168,6 +168,19 @@ export default function ProjectDetailPage() {
     setTasks(tasks.map(t => t.id === taskId ? { ...t, hours_spent: hours } : t));
   };
 
+  // НОВАЯ ФУНКЦИЯ УДАЛЕНИЯ ЭТАПА
+  const handleDeleteTask = async (taskId: string) => {
+    const confirmed = window.confirm(t('confirm_delete_task'));
+    if (!confirmed) return;
+
+    await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId);
+
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
+
   const handleSaveNotes = async () => {
     if (!id) return;
     const { error } = await supabase
@@ -232,7 +245,7 @@ export default function ProjectDetailPage() {
 
       const response = await getAIResponse(prompt);
       setAiResponse(response);
-      if (type === 'custom') setAiQuestion(''); // очищаем после ответа
+      if (type === 'custom') setAiQuestion('');
     } catch (error) {
       setAiError((error as Error).message);
     } finally {
@@ -285,7 +298,6 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Дополнительная информация */}
       <textarea
         value={additionalInfo}
         onChange={e => setAdditionalInfo(e.target.value)}
@@ -303,7 +315,6 @@ export default function ProjectDetailPage() {
         }}
       />
 
-      {/* Строка вопроса ИИ */}
       <div style={{ marginBottom: '16px' }}>
         <input
           type="text"
@@ -338,7 +349,6 @@ export default function ProjectDetailPage() {
         </button>
       </div>
 
-      {/* Кнопки ИИ */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', 
@@ -407,7 +417,6 @@ export default function ProjectDetailPage() {
         </button>
       </div>
 
-      {/* Ошибки ИИ */}
       {aiError && (
         <div style={{ 
           padding: '10px', 
@@ -420,7 +429,6 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      {/* Ответ ИИ */}
       {aiResponse && (
         <div style={{
           padding: '12px',
@@ -505,19 +513,34 @@ export default function ProjectDetailPage() {
         style={{ display: 'none' }}
       />
 
+      {/* БЛОК ЗАДАЧ С КНОПКОЙ УДАЛЕНИЯ */}
       <h3 style={{ color: '#0f0', marginBottom: '16px', fontSize: '18px' }}>
         {t('tasks')} ({tasks.filter(t => t.completed).length}/{tasks.length})
       </h3>
       <div style={{ marginBottom: '24px' }}>
         {tasks.map(task => (
-          <div key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+          <div key={task.id} style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            marginBottom: '12px',
+            padding: '8px',
+            background: 'rgba(30, 30, 40, 0.6)',
+            borderRadius: '6px'
+          }}>
             <input
               type="checkbox"
               checked={task.completed}
               onChange={e => handleToggleTask(task.id, e.target.checked)}
               style={{ marginRight: '12px', transform: 'scale(1.3)' }}
             />
-            <span style={{ flex: 1, fontSize: '16px', color: '#0f0' }}>{task.title}</span>
+            <span style={{ 
+              flex: 1, 
+              fontSize: '16px', 
+              color: '#0f0',
+              textDecoration: task.completed ? 'line-through' : 'none'
+            }}>
+              {task.title}
+            </span>
             <input
               type="number"
               step="0.25"
@@ -526,16 +549,31 @@ export default function ProjectDetailPage() {
               onChange={e => handleUpdateHours(task.id, e.target.value)}
               placeholder="0"
               style={{ 
-                width: '80px', 
-                padding: '6px', 
+                width: '70px', 
+                padding: '4px', 
                 fontSize: '14px', 
                 textAlign: 'right', 
                 background: 'rgba(20, 20, 30, 0.8)',
                 border: '1px solid rgba(0, 255, 0, 0.3)',
                 color: '#0f0',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                marginRight: '8px'
               }}
             />
+            <button
+              onClick={() => handleDeleteTask(task.id)}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              🗑️
+            </button>
           </div>
         ))}
       </div>
