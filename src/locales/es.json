@@ -31,5 +31,11 @@
   "ai_description": "Descripción",
   "ai_tasks": "Tareas",
   "ai_improve": "Mejorar",
-  "ai_notes": "Notas"
+  "ai_notes": "Notas",
+  "additional_info": "Información adicional",
+  "ask_ai": "Preguntar a la IA",
+  "ask_ai_placeholder": "Haz tu pregunta a la IA...",
+  "welcome_title": "Bienvenido a Projects Hub",
+  "welcome_description": "Gestiona tus proyectos, realiza un seguimiento de tareas y obtén asistencia de IA para una mayor productividad.",
+  "create_with_ai_prompt": "¡Crea tu proyecto con la ayuda de la IA!"
 }
