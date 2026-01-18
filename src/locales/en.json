@@ -37,5 +37,6 @@
   "ask_ai_placeholder": "Ask your question to AI...",
   "welcome_title": "Welcome to Projects Hub",
   "welcome_description": "Manage your projects, track tasks, and get AI assistance for better productivity.",
-  "create_with_ai_prompt": "Create your project with AI assistant!"
+  "create_with_ai_prompt": "Create your project with AI assistant!",
+  "confirm_delete_task": "Are you sure you want to delete this task?"
 }
