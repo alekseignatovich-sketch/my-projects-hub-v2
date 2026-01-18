@@ -62,13 +62,13 @@ export default function Dashboard() {
   };
 
   const handleCreate = async () => {
-    // Создаём проект с редактируемым названием
     const { data: newProject, error } = await supabase
       .from('projects')
       .insert({ 
         user_id: user.id, 
-        title: '', // Пустое название для редактирования
-        description: '' 
+        title: '', 
+        description: '',
+        additional_info: '' // ← новое поле
       })
       .select()
       .single();
@@ -82,6 +82,20 @@ export default function Dashboard() {
 
   return (
     <div>
+      {/* Описание на главной */}
+      <div style={{ 
+        marginBottom: '24px', 
+        padding: '16px', 
+        background: 'rgba(0, 20, 0, 0.3)', 
+        borderRadius: '12px',
+        border: '1px solid rgba(0, 255, 0, 0.2)'
+      }}>
+        <h2 style={{ color: '#0f0', margin: '0 0 8px 0' }}>{t('welcome_title')}</h2>
+        <p style={{ color: '#0f0', opacity: 0.8, margin: 0, lineHeight: 1.5 }}>
+          {t('welcome_description')}
+        </p>
+      </div>
+
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -128,6 +142,27 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Призыв к действию */}
+      {projects.length > 0 && (
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '24px', 
+          padding: '12px',
+          background: 'rgba(106, 13, 173, 0.2)',
+          borderRadius: '8px',
+          border: '1px solid rgba(106, 13, 173, 0.3)'
+        }}>
+          <p style={{ 
+            color: '#e0b0ff', 
+            margin: 0,
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
+            {t('create_with_ai_prompt')}
+          </p>
+        </div>
+      )}
+
       {projects.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
@@ -160,7 +195,6 @@ export default function Dashboard() {
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              {/* Иконка проекта */}
               <div style={{ 
                 width: '40px', 
                 height: '40px', 
@@ -177,7 +211,6 @@ export default function Dashboard() {
                 {project.title.charAt(0).toUpperCase() || 'P'}
               </div>
 
-              {/* Прогресс */}
               <div style={{
                 position: 'absolute',
                 top: '8px',
