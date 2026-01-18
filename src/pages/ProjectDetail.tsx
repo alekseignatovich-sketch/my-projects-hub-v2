@@ -12,12 +12,14 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState(''); // ← новое поле
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [notes, setNotes] = useState('');
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiError, setAiError] = useState('');
+  const [aiQuestion, setAiQuestion] = useState(''); // ← строка вопроса
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
 
@@ -42,6 +44,7 @@ export default function ProjectDetailPage() {
     setProject(projectData);
     setTitle(projectData.title || '');
     setDescription(projectData.description || '');
+    setAdditionalInfo(projectData.additional_info || ''); // ← загружаем доп. инфо
 
     if (projectData.preview_path) {
       const { data: signedUrlData, error: urlError } = await supabase.storage
@@ -79,12 +82,13 @@ export default function ProjectDetailPage() {
       .update({ 
         title: finalTitle, 
         description: description.trim(),
+        additional_info: additionalInfo.trim(), // ← сохраняем доп. инфо
         updated_at: new Date().toISOString() 
       })
       .eq('id', id);
 
     if (!error) {
-      setProject((prev: any) => ({ ...prev, title: finalTitle, description: description.trim() }));
+      setProject((prev: any) => ({ ...prev, title: finalTitle, description: description.trim(), additional_info: additionalInfo.trim() }));
       alert(t('save_success'));
     }
   };
@@ -184,7 +188,7 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes') => {
+  const handleAIAssist = async (type: 'description' | 'tasks' | 'improve' | 'notes' | 'custom') => {
     if (!project) return;
     
     setIsGenerating(true);
@@ -193,8 +197,8 @@ export default function ProjectDetailPage() {
 
     try {
       const currentDescription = description.trim() || 'No description provided';
+      const additionalInfoText = additionalInfo.trim() || 'No additional information';
       
-      // Определяем язык ответа
       const languageMap: Record<string, string> = {
         'en': 'English',
         'ru': 'Russian',
@@ -205,25 +209,30 @@ export default function ProjectDetailPage() {
       let prompt = '';
       
       switch (type) {
+        case 'custom':
+          prompt = `Context: Project "${title}" with description: "${currentDescription}". Additional info: "${additionalInfoText}". Question: ${aiQuestion}. Respond in ${responseLanguage}.`;
+          break;
+          
         case 'description':
-          prompt = `Create a professional project description based on the title "${title}". Make it concise (2-3 sentences) in business style. Respond in ${responseLanguage}.`;
+          prompt = `Based on project title "${title}" and additional info: "${additionalInfoText}", create a professional description. Respond in ${responseLanguage}.`;
           break;
           
         case 'tasks':
-          prompt = `Based on the project "${title}" with description: "${currentDescription}", break it down into 5 specific implementation stages. Each stage should start with a verb (e.g., "Create", "Develop", "Design"). Provide as a comma-separated list. Respond in ${responseLanguage}.`;
+          prompt = `Based on project "${title}" with description: "${currentDescription}" and additional info: "${additionalInfoText}", break it down into 5 specific stages. Respond in ${responseLanguage}.`;
           break;
           
         case 'improve':
-          prompt = `Analyze the project "${title}" with description: "${currentDescription}". Suggest 3 specific improvements or development ideas. Keep it brief and actionable. Respond in ${responseLanguage}.`;
+          prompt = `Analyze project "${title}" with description: "${currentDescription}" and additional info: "${additionalInfoText}". Suggest 3 improvements. Respond in ${responseLanguage}.`;
           break;
           
         case 'notes':
-          prompt = `Based on the project "${title}" with description: "${currentDescription}", write comprehensive notes for the implementation phase. Include tips, potential risks to watch for, and key considerations. Length: 3-4 sentences. Respond in ${responseLanguage}.`;
+          prompt = `Based on project "${title}" with description: "${currentDescription}" and additional info: "${additionalInfoText}", write comprehensive notes. Respond in ${responseLanguage}.`;
           break;
       }
 
       const response = await getAIResponse(prompt);
       setAiResponse(response);
+      if (type === 'custom') setAiQuestion(''); // очищаем после ответа
     } catch (error) {
       setAiError((error as Error).message);
     } finally {
@@ -239,7 +248,6 @@ export default function ProjectDetailPage() {
 
   return (
     <div>
-      {/* Заголовок с редактируемым названием */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -275,6 +283,59 @@ export default function ProjectDetailPage() {
             {progress}%
           </span>
         </div>
+      </div>
+
+      {/* Дополнительная информация */}
+      <textarea
+        value={additionalInfo}
+        onChange={e => setAdditionalInfo(e.target.value)}
+        placeholder={t('additional_info')}
+        rows={2}
+        style={{ 
+          width: '100%', 
+          padding: '12px',
+          marginBottom: '24px',
+          fontSize: '16px',
+          border: '1px solid rgba(106, 13, 173, 0.5)',
+          borderRadius: '8px',
+          background: 'rgba(20, 20, 30, 0.8)',
+          color: '#e0b0ff'
+        }}
+      />
+
+      {/* Строка вопроса ИИ */}
+      <div style={{ marginBottom: '16px' }}>
+        <input
+          type="text"
+          value={aiQuestion}
+          onChange={e => setAiQuestion(e.target.value)}
+          placeholder={t('ask_ai_placeholder')}
+          style={{
+            width: '100%',
+            padding: '10px',
+            fontSize: '14px',
+            border: '1px solid rgba(106, 13, 173, 0.5)',
+            borderRadius: '6px',
+            background: 'rgba(20, 20, 30, 0.8)',
+            color: '#e0b0ff'
+          }}
+        />
+        <button
+          onClick={() => handleAIAssist('custom')}
+          disabled={!aiQuestion.trim() || isGenerating}
+          style={{
+            marginTop: '8px',
+            padding: '8px 16px',
+            backgroundColor: '#6a0dad',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          💬 {t('ask_ai')}
+        </button>
       </div>
 
       {/* Кнопки ИИ */}
