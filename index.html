@@ -30,12 +30,15 @@
     <script>
       const c = document.getElementById('matrix-bg');
       const ctx = c.getContext('2d');
+      
       const resizeCanvas = () => {
         c.width = window.innerWidth;
-        c.height = document.body.scrollHeight;
+        c.height = Math.max(document.body.scrollHeight, window.innerHeight);
       };
+      
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('load', resizeCanvas);
 
       const chars = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       const fontSize = 14;
