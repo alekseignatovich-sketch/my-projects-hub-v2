@@ -37,5 +37,6 @@
   "ask_ai_placeholder": "Haz tu pregunta a la IA...",
   "welcome_title": "Bienvenido a Projects Hub",
   "welcome_description": "Gestiona tus proyectos, realiza un seguimiento de tareas y obtén asistencia de IA para una mayor productividad.",
-  "create_with_ai_prompt": "¡Crea tu proyecto con la ayuda de la IA!"
+  "create_with_ai_prompt": "¡Crea tu proyecto con la ayuda de la IA!",
+  "confirm_delete_task": "¿Está seguro de que desea eliminar esta tarea?"
 }
